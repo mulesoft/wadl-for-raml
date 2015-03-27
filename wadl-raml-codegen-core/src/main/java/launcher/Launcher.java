@@ -2,10 +2,7 @@ package launcher;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,18 +19,15 @@ import org.wadl.model.builder.ApplicationBuilder;
 
 public class Launcher {
     
-    public static void main(String[] args) throws FileNotFoundException{
+    public static void main(String[] args){
         
-//        HashMap<String,String> argsMap = parseArgs(args);
-//        
-//        String inputFilePath = argsMap.get("input");        
-//        String outputFilePath = argsMap.get("output");
-//        
-//        File inputFile = new File(inputFilePath);
-//        File outputFile = new File(outputFilePath);
-        File inputFile = new File("/Translator2.wsdl");
-//        InputStream is = new FileInputStream(inputFile);
-        File outputFile = new File("/Translator.raml");
+        HashMap<String,String> argsMap = parseArgs(args);
+        
+        String inputFilePath = argsMap.get("input");        
+        String outputFilePath = argsMap.get("output");
+        
+        File inputFile = new File(inputFilePath);
+        File outputFile = new File(outputFilePath);
         
         try {
             process(inputFile, outputFile);
