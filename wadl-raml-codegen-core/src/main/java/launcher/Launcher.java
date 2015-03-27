@@ -11,6 +11,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.digester.PathCallParamRule;
 import org.mulesoft.raml.builder.RamlBuilder;
 import org.mulesoft.web.app.model.ApplicationModel;
+import org.raml.emitter.IRamlHierarchyTarget;
 import org.raml.emitter.RamlEmitterV2;
 import org.raml.model.Raml2;
 import org.w3c.dom.Document;
@@ -52,14 +53,37 @@ public class Launcher {
         ApplicationModel app = appBuilder.buildApplication(element);
         Raml2 raml = ramlBuilder.buildRaml(app);
         
-        RamlEmitterV2 emmitter = new RamlEmitterV2();
-        emmitter.setSingle(true);
-        String dump = emmitter.dump(raml);
-        
-        saveFile(dump,outputFile);
+        saveRaml(outputFile, raml);
     }
 
-    private static void saveFile(String dump, File file) throws Exception {
+	private static void saveRaml(final File outputFile, Raml2 raml)
+	{
+    	final File root = outputFile.getParentFile();
+    	
+		RamlEmitterV2 emmitter = new RamlEmitterV2();
+		emmitter.dump(new IRamlHierarchyTarget() {
+			
+			public void writeRoot(String content) {
+				try {
+					saveFile(content, outputFile);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+			public void write(String path, String content) {
+				File f = new File(root, path);
+				f.getParentFile().mkdirs();
+				try {
+					saveFile(content, f);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		},raml);
+	}
+
+    private static void saveFile(String content, File file) throws Exception {
         
         if(!file.exists()){
         	file.getParentFile().mkdirs();
@@ -68,7 +92,7 @@ public class Launcher {
         
         FileOutputStream fos = new FileOutputStream(file);
         BufferedOutputStream bos = new BufferedOutputStream(fos);
-        bos.write(dump.getBytes("UTF-8"));
+        bos.write(content.getBytes("UTF-8"));
         bos.close();
     }
     

@@ -27,7 +27,7 @@ import org.w3c.dom.ls.LSInput;
 
 public class ApplicationBuilder {
     
-	private final String DEFAULT_API_TITLE = "RESTful API spec";
+	private final String DEFAULT_API_TITLE = "Enter API title here";
 	
     DocumentationExtractor docExtractor = new DocumentationExtractor();
     

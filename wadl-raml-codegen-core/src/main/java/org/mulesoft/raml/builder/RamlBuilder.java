@@ -29,7 +29,7 @@ public class RamlBuilder {
 		Map<String, String>  schemasBodys = app.getIncludedSchemas();
 		for (String schemaName : schemasBodys.keySet()){
 			String body = schemasBodys.get(schemaName);
-			raml.addGlobalSchema(schemaName, body, true, true);
+			raml.addGlobalSchema(schemaName, body, false, true);
 		}
         
         return raml;
