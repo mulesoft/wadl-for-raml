@@ -1,8 +1,8 @@
 package org.wadl.model.builder;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -10,24 +10,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.xerces.impl.xs.SchemaGrammar;
+import org.apache.xerces.dom.DOMInputImpl;
 import org.apache.xerces.xs.XSConstants;
 import org.apache.xerces.xs.XSImplementation;
 import org.apache.xerces.xs.XSLoader;
 import org.apache.xerces.xs.XSModel;
 import org.apache.xerces.xs.XSNamedMap;
-import org.apache.xerces.xs.XSObject;
 import org.apache.commons.io.IOUtils;
 import org.mulesoft.web.app.model.ApplicationModel;
 import org.mulesoft.web.app.model.DocumentationModel;
 import org.mulesoft.web.app.model.ResourceModel;
-import org.mulesoft.web.app.model.ResourceOwner;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
+import org.w3c.dom.ls.LSInput;
 
 
 public class ApplicationBuilder {
@@ -38,14 +33,14 @@ public class ApplicationBuilder {
     
     ResourceBuilder resourceBuilder = new ResourceBuilder();
     
-    public ApplicationModel buildApplication(File inputFile) throws Exception{
-        Document document = buildDocument(inputFile);
-        Element element = document.getDocumentElement();
+    IPathResolver pathResolver;
+    
+    public ApplicationModel buildApplication(Element element) throws Exception{
     	
-        ApplicationModel app = new ApplicationModel();
+    	
+        ApplicationModel app = new ApplicationModel();        
         
-        List<String> includePaths = getIncludePaths(element);
-        Map <String, String> includedSchemas = getSchemas(includePaths, inputFile.getParent());
+        Map <String, String> includedSchemas = getSchemas(element, pathResolver);
         app.setIncludedSchemas(includedSchemas);
         
         DocumentationModel doc = docExtractor.extractDocumentation(element);
@@ -79,40 +74,57 @@ public class ApplicationBuilder {
         return app;
     }
     
-    private Map<String, String> getSchemas(List<String> includePaths, String parentFilePath) throws IOException {
+    private Map<String, String> getSchemas(Element element, IPathResolver pathResolver) throws IOException {
+    	
+    	List<String> includePaths = getIncludePaths(element);
+    	
     	Map<String,String> schemas = new HashMap<String, String>();
     	
     	for (String path : includePaths){
-    		File file = new File(parentFilePath + path);
-    		InputStream in = new FileInputStream(file);
-    		//System.out.println(IOUtils.toString(in));
-    		String schemaName = getSchemaName(file);
-    		String schemaContent = IOUtils.toString(in);
-    		if(!schemaName.equals(""))
+
+    		String schemaContent = pathResolver.getContent(path);
+    		String schemaName = getSchemaName(schemaContent);
+    		
+    		if(schemaName!=null)
     			schemas.put(schemaName, schemaContent);
     	}
     	return schemas;
 	}
     
-    private String getSchemaName(File file){
-    	String schemaName = "";
-    	System.setProperty(DOMImplementationRegistry.PROPERTY, "org.apache.xerces.dom.DOMXSImplementationSourceImpl");
-    	   DOMImplementationRegistry registry;
-    	   try {
-    	    registry = DOMImplementationRegistry.newInstance();
-    	    
-    	    XSImplementation impl = (XSImplementation) registry.getDOMImplementation("XS-Loader");
-    	    XSLoader schemaLoader = impl.createXSLoader(null);
-    	    XSModel model = schemaLoader.loadURI(file.toURI().getPath());
-    	    
-    	    XSNamedMap declarations = model.getComponents(XSConstants.ELEMENT_DECLARATION);
-    	    schemaName = declarations.item(0).getName();
-    	       	    	
-    	   } catch (Exception e) {
-    		   e.printStackTrace();
-    	   }
-    	   return schemaName;
-    }
+	private String getSchemaName(String content) {
+		
+		String propertyValue = System.getProperty(DOMImplementationRegistry.PROPERTY);
+
+		String schemaName = null;
+		System.setProperty(DOMImplementationRegistry.PROPERTY,"org.apache.xerces.dom.DOMXSImplementationSourceImpl");
+		DOMImplementationRegistry registry;
+		try {
+			ByteArrayInputStream bais = new ByteArrayInputStream(content.getBytes("UTF-8"));
+			LSInput input = new DOMInputImpl();
+			input.setByteStream(bais);
+
+			registry = DOMImplementationRegistry.newInstance();
+
+			XSImplementation impl = (XSImplementation) registry.getDOMImplementation("XS-Loader");
+			XSLoader schemaLoader = impl.createXSLoader(null);
+			XSModel model = schemaLoader.load(input);
+
+			XSNamedMap declarations = model.getComponents(XSConstants.ELEMENT_DECLARATION);
+			schemaName = declarations.item(0).getName();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		finally{
+			if(propertyValue!=null){
+				System.setProperty(DOMImplementationRegistry.PROPERTY,propertyValue);
+			}
+			else{
+				System.clearProperty(DOMImplementationRegistry.PROPERTY);
+			}
+		}
+		return schemaName;
+	}
 
 	private List<String> getIncludePaths (Element element){
     	List<String> includePaths = new ArrayList<String>();
@@ -126,13 +138,8 @@ public class ApplicationBuilder {
     	return includePaths;
     }
 
-    private static Document buildDocument(File inputFile) throws Exception {
-        
-        
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	public void setPathResolver(IPathResolver pathResolver) {
+		this.pathResolver = pathResolver;
+	}
 
-        DocumentBuilder dBuilder = factory.newDocumentBuilder();
-        Document document = dBuilder.parse(inputFile);
-        return document;
-    }
 }

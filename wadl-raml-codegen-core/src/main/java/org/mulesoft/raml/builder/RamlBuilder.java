@@ -1,6 +1,7 @@
 package org.mulesoft.raml.builder;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.mulesoft.web.app.model.ApplicationModel;
 import org.mulesoft.web.app.model.ResourceModel;
@@ -24,6 +25,12 @@ public class RamlBuilder {
             String path = ramlResource.getUri();
             raml.getResources().put(path, ramlResource);
         }
+        
+		Map<String, String>  schemasBodys = app.getIncludedSchemas();
+		for (String schemaName : schemasBodys.keySet()){
+			String body = schemasBodys.get(schemaName);
+			raml.addGlobalSchema(schemaName, body, true, true);
+		}
         
         return raml;
     }

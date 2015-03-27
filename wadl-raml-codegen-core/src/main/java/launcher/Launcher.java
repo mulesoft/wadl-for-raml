@@ -4,11 +4,11 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.digester.PathCallParamRule;
 import org.mulesoft.raml.builder.RamlBuilder;
 import org.mulesoft.web.app.model.ApplicationModel;
 import org.raml.emitter.RamlEmitterV2;
@@ -16,6 +16,7 @@ import org.raml.model.Raml2;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wadl.model.builder.ApplicationBuilder;
+import org.wadl.model.builder.BasicPathResolver;
 
 public class Launcher {
     
@@ -38,17 +39,18 @@ public class Launcher {
 
     private static void process(File inputFile, File outputFile) throws Exception {
         
+    	BasicPathResolver pathResolver = new BasicPathResolver(inputFile.getParentFile());
+    	
         ApplicationBuilder appBuilder = new ApplicationBuilder();
+        appBuilder.setPathResolver(pathResolver);
+        
         RamlBuilder ramlBuilder = new RamlBuilder();
         
-        ApplicationModel app = appBuilder.buildApplication(inputFile);
-        Raml2 raml = ramlBuilder.buildRaml(app);
+        Document document = buildDocument(inputFile);
+        Element element = document.getDocumentElement();
         
-		Map<String, String>  schemasBodys = app.getIncludedSchemas();
-		for (String schemaName : schemasBodys.keySet()){
-			String body = schemasBodys.get(schemaName);
-			raml.addGlobalSchema(schemaName, body, true, true);
-		}
+        ApplicationModel app = appBuilder.buildApplication(element);
+        Raml2 raml = ramlBuilder.buildRaml(app);
         
         RamlEmitterV2 emmitter = new RamlEmitterV2();
         emmitter.setSingle(true);
@@ -60,6 +62,7 @@ public class Launcher {
     private static void saveFile(String dump, File file) throws Exception {
         
         if(!file.exists()){
+        	file.getParentFile().mkdirs();
             file.createNewFile();
         }
         
@@ -82,6 +85,17 @@ public class Launcher {
             }
         }
         return map;
+    }
+    
+
+    private static Document buildDocument(File inputFile) throws Exception {
+        
+        
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+        DocumentBuilder dBuilder = factory.newDocumentBuilder();
+        Document document = dBuilder.parse(inputFile);
+        return document;
     }
 
 }
