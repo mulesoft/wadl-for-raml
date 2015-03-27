@@ -11,6 +11,7 @@ public class RequestModel extends HasRepresentation {
     
     private List<ParameterModel> headers = new ArrayList<ParameterModel>();
     
+    private String schema;
 
     public List<ParameterModel> getQueryParams() {
         return queryParams;
@@ -28,4 +29,11 @@ public class RequestModel extends HasRepresentation {
         this.headers.add(header);
     }
 
+	public String getSchema() {
+		return schema;
+	}
+
+	public void setSchema(String schema) {
+		this.schema = schema;
+	}
 }

@@ -1,8 +1,12 @@
 package org.mulesoft.web.app.model;
 
+import java.util.Map;
+
 
 public class ApplicationModel extends ResourceOwner{
     
+	private Map <String, String> includedSchemas;
+	
     private String title;
     
     private String baseUri;
@@ -22,5 +26,13 @@ public class ApplicationModel extends ResourceOwner{
     public void setBaseUri(String baseUri) {
         this.baseUri = baseUri;
     }
+
+	public Map<String, String> getIncludedSchemas() {
+		return includedSchemas;
+	}
+
+	public void setIncludedSchemas(Map<String, String> includedSchemas) {
+		this.includedSchemas = includedSchemas;
+	}
     
 }

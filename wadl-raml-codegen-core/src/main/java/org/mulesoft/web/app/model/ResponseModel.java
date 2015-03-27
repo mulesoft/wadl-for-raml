@@ -8,6 +8,8 @@ import org.wadl.model.builder.HasRepresentation;
 public class ResponseModel extends HasRepresentation {
 
     private String status;
+
+    private String schema;
     
     private List<ParameterModel> headers = new ArrayList<ParameterModel>();
     
@@ -28,4 +30,13 @@ public class ResponseModel extends HasRepresentation {
     public void setStatus(String status) {
         this.status = status;
     }
+
+	public String getSchema() {
+		return schema;
+	}
+
+	public void setSchema(String schema) {
+		this.schema = schema;
+	}
+    
 }

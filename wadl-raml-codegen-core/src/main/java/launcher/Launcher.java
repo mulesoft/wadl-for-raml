@@ -2,8 +2,12 @@ package launcher;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,15 +22,18 @@ import org.wadl.model.builder.ApplicationBuilder;
 
 public class Launcher {
     
-    public static void main(String[] args){
+    public static void main(String[] args) throws FileNotFoundException{
         
-        HashMap<String,String> argsMap = parseArgs(args);
-        
-        String inputFilePath = argsMap.get("input");        
-        String outputFilePath = argsMap.get("output");
-        
-        File inputFile = new File(inputFilePath);
-        File outputFile = new File(outputFilePath);
+//        HashMap<String,String> argsMap = parseArgs(args);
+//        
+//        String inputFilePath = argsMap.get("input");        
+//        String outputFilePath = argsMap.get("output");
+//        
+//        File inputFile = new File(inputFilePath);
+//        File outputFile = new File(outputFilePath);
+        File inputFile = new File("/Translator2.wsdl");
+//        InputStream is = new FileInputStream(inputFile);
+        File outputFile = new File("/Translator.raml");
         
         try {
             process(inputFile, outputFile);
@@ -40,11 +47,14 @@ public class Launcher {
         ApplicationBuilder appBuilder = new ApplicationBuilder();
         RamlBuilder ramlBuilder = new RamlBuilder();
         
-        Document document = buildDocument(inputFile);
-        Element element = document.getDocumentElement();
-        
-        ApplicationModel app = appBuilder.buildApplication(element);
+        ApplicationModel app = appBuilder.buildApplication(inputFile);
         Raml2 raml = ramlBuilder.buildRaml(app);
+        
+		Map<String, String>  schemasBodys = app.getIncludedSchemas();
+		for (String schemaName : schemasBodys.keySet()){
+			String body = schemasBodys.get(schemaName);
+			raml.addGlobalSchema(schemaName, body, true, true);
+		}
         
         RamlEmitterV2 emmitter = new RamlEmitterV2();
         emmitter.setSingle(true);
@@ -63,16 +73,6 @@ public class Launcher {
         BufferedOutputStream bos = new BufferedOutputStream(fos);
         bos.write(dump.getBytes("UTF-8"));
         bos.close();
-    }
-
-    private static Document buildDocument(File inputFile) throws Exception {
-        
-        
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-        DocumentBuilder dBuilder = factory.newDocumentBuilder();
-        Document document = dBuilder.parse(inputFile);
-        return document;
     }
     
     private static HashMap<String, String> parseArgs(String[] args) {

@@ -1,6 +1,7 @@
 package org.wadl.model.builder;
 
 import java.util.List;
+import java.util.Map;
 
 import org.mulesoft.web.app.model.ParameterModel;
 import org.mulesoft.web.app.model.DocumentationModel;
@@ -36,7 +37,9 @@ public class ResponseBuilder {
         
         List<Element> representationElements = Utils.extractElements(element, "representation");
         for(Element representationElement : representationElements){
+        	String schemaName = representationElement.getAttribute("element").substring("yn:".length());
             RepresentationModel representation = representationBuilder.buildRepresentation(representationElement);
+            representation.setSchema(schemaName);
             responseModel.addRepresentation(representation);
         }
         

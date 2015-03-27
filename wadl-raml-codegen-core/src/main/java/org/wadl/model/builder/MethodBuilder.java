@@ -1,6 +1,7 @@
 package org.wadl.model.builder;
 
 import java.util.List;
+import java.util.Map;
 
 import org.mulesoft.web.app.model.DocumentationModel;
 import org.mulesoft.web.app.model.MethodModel;

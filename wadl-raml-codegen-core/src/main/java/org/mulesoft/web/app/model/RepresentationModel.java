@@ -8,6 +8,8 @@ public class RepresentationModel {
     private String id;
     
     private String mediaType;
+
+    private String schema;
     
     private List<ParameterModel> formParameters = new ArrayList<ParameterModel>();
 
@@ -34,5 +36,13 @@ public class RepresentationModel {
     public void addFormParameter(ParameterModel formParameter) {
         this.formParameters.add(formParameter);
     }
+
+	public String getSchema() {
+		return schema;
+	}
+
+	public void setSchema(String schema) {
+		this.schema = schema;
+	}
 
 }

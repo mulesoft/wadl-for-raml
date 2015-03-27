@@ -16,7 +16,10 @@ public class MimeTypeBuilder {
     public MimeType buildMimeType(RepresentationModel representationModel){
         MimeType mimeType = new MimeType();
         String mediaType = representationModel.getMediaType();
+        String schema = representationModel.getSchema();
         mimeType.setType(mediaType);
+//        mimeType.setSchemaOrigin(schema);
+        mimeType.setSchema(schema);
         List<ParameterModel> formParameters = representationModel.getFormParameters();
         
         Map<String, List<FormParameter>> formParamMap = mimeType.getFormParameters();

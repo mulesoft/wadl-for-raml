@@ -2,8 +2,8 @@ package org.wadl.model.builder;
 
 import java.util.List;
 
-import org.mulesoft.web.app.model.ParameterModel;
 import org.mulesoft.web.app.model.DocumentationModel;
+import org.mulesoft.web.app.model.ParameterModel;
 import org.mulesoft.web.app.model.RepresentationModel;
 import org.mulesoft.web.app.model.RequestModel;
 import org.w3c.dom.Element;
@@ -36,7 +36,9 @@ public class RequestBuilder {
         
         List<Element> representationElements = Utils.extractElements(element, "representation");
         for(Element representationElement : representationElements){
+        	String schemaName = representationElement.getAttribute("element").substring("yn:".length());
             RepresentationModel representation = representationBuilder.buildRepresentation(representationElement);
+            representation.setSchema(schemaName);
             requestModel.addRepresentation(representation);
         }
         
