@@ -1,10 +1,7 @@
-package org.wadl.model.builder;
+package org.mulesoft.web.app.model;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.mulesoft.web.app.model.AbstractElement;
-import org.mulesoft.web.app.model.RepresentationModel;
 
 public class HasRepresentation extends AbstractElement {
     

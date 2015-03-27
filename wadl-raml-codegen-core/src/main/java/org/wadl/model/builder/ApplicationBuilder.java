@@ -1,10 +1,7 @@
 package org.wadl.model.builder;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,36 +13,29 @@ import org.apache.xerces.xs.XSImplementation;
 import org.apache.xerces.xs.XSLoader;
 import org.apache.xerces.xs.XSModel;
 import org.apache.xerces.xs.XSNamedMap;
-import org.apache.commons.io.IOUtils;
 import org.mulesoft.web.app.model.ApplicationModel;
-import org.mulesoft.web.app.model.DocumentationModel;
 import org.mulesoft.web.app.model.ResourceModel;
 import org.w3c.dom.Element;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.LSInput;
 
 
-public class ApplicationBuilder {
+public class ApplicationBuilder extends AbstractBuilder<ApplicationModel> {
     
+	public ApplicationBuilder(Class<ApplicationModel> modelClass) {
+		super(modelClass);
+	}
+
 	private final String DEFAULT_API_TITLE = "Enter API title here";
-	
-    DocumentationExtractor docExtractor = new DocumentationExtractor();
     
-    ResourceBuilder resourceBuilder = new ResourceBuilder();
-    
-    IPathResolver pathResolver;
-    
-    public ApplicationModel buildApplication(Element element) throws Exception{
+    public void fillModel(ApplicationModel app, Element element) throws Exception{
     	
-    	
-        ApplicationModel app = new ApplicationModel();        
+        extractDocumentation(element, app);
         
         Map <String, String> includedSchemas = getSchemas(element, pathResolver);
         app.setIncludedSchemas(includedSchemas);
         
-        DocumentationModel doc = docExtractor.extractDocumentation(element);
-        app.setDoc(doc);
-        
+        ResourceBuilder resourceBuilder = getBuildManager().getBuilder(ResourceBuilder.class);
         List<Element> resourcesElements = Utils.extractElements(element, "resources");
         for(Element resourcesElement : resourcesElements){
             
@@ -61,17 +51,25 @@ public class ApplicationBuilder {
             	app.setTitle(DEFAULT_API_TITLE);
             }
             
-            
             List<Element> resourceElements = Utils.extractElements(resourcesElement,"resource");
             for(Element resourceElement : resourceElements){
-                
-                ResourceModel res = resourceBuilder.buildResource(resourceElement);
+				ResourceModel res = resourceBuilder.build(resourceElement);
                 Utils.setParentUri(res,"");
                 app.addResource(res);
             }
         }
-
-        return app;
+        
+        MethodBuilder methodBuilder = getBuildManager().getBuilder(MethodBuilder.class);
+        List<Element> methodElements = Utils.extractElements(element, "method");
+        for(Element methodElement: methodElements){
+        	methodBuilder.build(methodElement);
+        }
+        
+        RepresentationBuilder representationBuilder = getBuildManager().getBuilder(RepresentationBuilder.class);
+        List<Element> representationElements = Utils.extractElements(element, "representation");
+        for(Element representationElement: representationElements){
+        	representationBuilder.build(representationElement);
+        }
     }
     
     private Map<String, String> getSchemas(Element element, IPathResolver pathResolver) throws IOException {
@@ -83,19 +81,20 @@ public class ApplicationBuilder {
     	for (String path : includePaths){
 
     		String schemaContent = pathResolver.getContent(path);
-    		String schemaName = getSchemaName(schemaContent);
+    		List<String> elementNames = getRootElementNames(schemaContent);
     		
-    		if(schemaName!=null)
-    			schemas.put(schemaName, schemaContent);
+    		for(String str : elementNames){
+    			schemas.put(str, schemaContent);
+    		}
     	}
     	return schemas;
 	}
     
-	private String getSchemaName(String content) {
+	private List<String> getRootElementNames(String content) {
 		
+		ArrayList<String> list = new ArrayList<String>();
 		String propertyValue = System.getProperty(DOMImplementationRegistry.PROPERTY);
 
-		String schemaName = null;
 		System.setProperty(DOMImplementationRegistry.PROPERTY,"org.apache.xerces.dom.DOMXSImplementationSourceImpl");
 		DOMImplementationRegistry registry;
 		try {
@@ -110,7 +109,11 @@ public class ApplicationBuilder {
 			XSModel model = schemaLoader.load(input);
 
 			XSNamedMap declarations = model.getComponents(XSConstants.ELEMENT_DECLARATION);
-			schemaName = declarations.item(0).getName();
+			
+			for(int i = 0 ; i < declarations.size() ; i++){
+				String schemaName = declarations.item(i).getName();
+				list.add(schemaName);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -123,7 +126,7 @@ public class ApplicationBuilder {
 				System.clearProperty(DOMImplementationRegistry.PROPERTY);
 			}
 		}
-		return schemaName;
+		return list;
 	}
 
 	private List<String> getIncludePaths (Element element){
@@ -137,9 +140,5 @@ public class ApplicationBuilder {
     	}
     	return includePaths;
     }
-
-	public void setPathResolver(IPathResolver pathResolver) {
-		this.pathResolver = pathResolver;
-	}
 
 }

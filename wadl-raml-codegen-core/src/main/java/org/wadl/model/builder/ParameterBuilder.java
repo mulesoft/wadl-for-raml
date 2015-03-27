@@ -4,12 +4,15 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.mulesoft.web.app.model.ParameterModel;
-import org.mulesoft.web.app.model.DocumentationModel;
 import org.w3c.dom.Element;
 
-public class ParameterBuilder {
+public class ParameterBuilder extends AbstractBuilder<ParameterModel> {
     
-    private static final HashMap<String,String> typeMap = new HashMap<String, String>();
+    public ParameterBuilder(Class<ParameterModel> modelClass) {
+		super(modelClass);
+	}
+
+	private static final HashMap<String,String> typeMap = new HashMap<String, String>();
     {
         typeMap.put("int", "integer");
         typeMap.put("short", "number");
@@ -18,14 +21,10 @@ public class ParameterBuilder {
         typeMap.put("real", "number");        
         typeMap.put("bool", "boolean");
     }
-    
-    DocumentationExtractor docExtractor = new DocumentationExtractor();
-    
-    public ParameterModel buildParameter(Element element){
+
+    public void fillModel(ParameterModel param, Element element) throws Exception{
         
-        ParameterModel param = new ParameterModel();
-        DocumentationModel doc = docExtractor.extractDocumentation(element);
-        param.setDoc(doc);
+        extractDocumentation(element, param);
         
         String id = element.getAttribute("id");
         param.setId(id);
@@ -62,8 +61,6 @@ public class ParameterBuilder {
             String optionValue = optionElement.getAttribute("value");
             param.addOption(optionValue);
         }
-        
-        return param;        
     }
 
     private String refineType(String type) {

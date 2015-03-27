@@ -1,52 +1,40 @@
 package org.wadl.model.builder;
 
 import java.util.List;
-import java.util.Map;
 
-import org.mulesoft.web.app.model.DocumentationModel;
 import org.mulesoft.web.app.model.MethodModel;
 import org.mulesoft.web.app.model.RequestModel;
 import org.mulesoft.web.app.model.ResponseModel;
 import org.w3c.dom.Element;
 
-public class MethodBuilder {
+public class MethodBuilder extends AbstractBuilder<MethodModel> {
     
-    private DocumentationExtractor docExtractor = new DocumentationExtractor();
+    public MethodBuilder(Class<MethodModel> modelClass) {
+		super(modelClass);
+	}
     
-    private ResponseBuilder responseBuilder = new ResponseBuilder();
-    
-    private RequestBuilder requestBuilder = new RequestBuilder();
-    
-    public MethodModel buildMethod(Element element){
+    public void fillModel(MethodModel method, Element element) throws Exception{
         
-        MethodModel method = new MethodModel();
-        
-        DocumentationModel doc = docExtractor.extractDocumentation(element);
-        method.setDoc(doc);
-        
-        String idStr = element.getAttribute("id");
-        if(!idStr.isEmpty()){
-            method.setId(idStr);
-        }        
+        extractDocumentation(element, method);
         
         String typeStr = element.getAttribute("name");
         if(!typeStr.isEmpty()){
             method.setName(typeStr);
         }
         
+        RequestBuilder requestBuilder = getBuildManager().getBuilder(RequestBuilder.class);        
         List<Element> requestElements = Utils.extractElements(element, "request");
         for(Element requestElement : requestElements){
-            RequestModel request = requestBuilder.buildRequest(requestElement);
+            RequestModel request = requestBuilder.build(requestElement);
             method.addRequest(request);
         }
         
+        ResponseBuilder responseBuilder = getBuildManager().getBuilder(ResponseBuilder.class);
         List<Element> responseElements = Utils.extractElements(element, "response");
         for(Element responseElement : responseElements){
-            ResponseModel response = responseBuilder.buildResponse(responseElement);
+            ResponseModel response = responseBuilder.build(responseElement);
             method.addResponse(response);
         }
-        
-        return method;
     }
 
 }

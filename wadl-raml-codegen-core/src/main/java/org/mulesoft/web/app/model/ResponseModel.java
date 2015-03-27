@@ -3,8 +3,6 @@ package org.mulesoft.web.app.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.wadl.model.builder.HasRepresentation;
-
 public class ResponseModel extends HasRepresentation {
 
     private String status;

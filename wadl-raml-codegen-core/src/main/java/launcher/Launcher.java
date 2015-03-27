@@ -8,7 +8,6 @@ import java.util.HashMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.commons.digester.PathCallParamRule;
 import org.mulesoft.raml.builder.RamlBuilder;
 import org.mulesoft.web.app.model.ApplicationModel;
 import org.raml.emitter.IRamlHierarchyTarget;
@@ -16,8 +15,8 @@ import org.raml.emitter.RamlEmitterV2;
 import org.raml.model.Raml2;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.wadl.model.builder.ApplicationBuilder;
 import org.wadl.model.builder.BasicPathResolver;
+import org.wadl.model.builder.BuildManager;
 
 public class Launcher {
     
@@ -42,15 +41,15 @@ public class Launcher {
         
     	BasicPathResolver pathResolver = new BasicPathResolver(inputFile.getParentFile());
     	
-        ApplicationBuilder appBuilder = new ApplicationBuilder();
-        appBuilder.setPathResolver(pathResolver);
+        BuildManager buildManger = new BuildManager();
+        buildManger.setPathResolver(pathResolver);
         
         RamlBuilder ramlBuilder = new RamlBuilder();
         
         Document document = buildDocument(inputFile);
         Element element = document.getDocumentElement();
         
-        ApplicationModel app = appBuilder.buildApplication(element);
+        ApplicationModel app = buildManger.process(element);
         Raml2 raml = ramlBuilder.buildRaml(app);
         
         saveRaml(outputFile, raml);

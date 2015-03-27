@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ParameterModel extends AbstractElement {
-    
-    private String id;
-    
     private String name;
     
     private String style;
@@ -24,14 +21,6 @@ public class ParameterModel extends AbstractElement {
     private boolean repeating = false;
     
     private List<String> options = new ArrayList<String>();
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

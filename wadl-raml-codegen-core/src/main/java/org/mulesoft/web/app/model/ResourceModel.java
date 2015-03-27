@@ -6,16 +6,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ResourceModel extends ResourceOwner {
-    
-    private String id;
-    
+
     private String path;
     
     private String type;
     
     private String parenUri;
     
-    private Map<String,List<MethodModel>> methods = new LinkedHashMap<String, List<MethodModel>>();
+    private List<MethodModel> methods = new ArrayList<MethodModel>();
     
     private List<ParameterModel> queryParams = new ArrayList<ParameterModel>();
     
@@ -41,16 +39,8 @@ public class ResourceModel extends ResourceOwner {
         return path;
     }
 
-    public String getId() {
-        return id;
-    }
-
     public String getType() {
         return type;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public void setPath(String path) {
@@ -61,17 +51,11 @@ public class ResourceModel extends ResourceOwner {
         this.type = type;
     }
 
-    public void addMethod(MethodModel method) {
-        String htrtpType = method.getName();
-        List<MethodModel> list = this.methods.get(htrtpType);
-        if(list==null){
-            list =new ArrayList<MethodModel>();
-            this.methods.put(htrtpType, list);
-        }
-        list.add(method);
+    public void addMethod(MethodModel method) {        
+        methods.add(method);
     }
 
-    public Map<String,List<MethodModel>> getMethods() {
+    public List<MethodModel> getMethods() {
         return methods;
     }
     

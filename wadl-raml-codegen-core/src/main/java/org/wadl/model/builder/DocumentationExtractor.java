@@ -5,9 +5,13 @@ import java.util.List;
 import org.mulesoft.web.app.model.DocumentationModel;
 import org.w3c.dom.Element;
 
-public class DocumentationExtractor {
+public class DocumentationExtractor extends AbstractBuilder<DocumentationModel> {
     
-    public DocumentationModel extractDocumentation(Element element){
+    public DocumentationExtractor(Class<DocumentationModel> modelClass) {
+		super(modelClass);
+	}
+
+	public void fillModel(DocumentationModel result, Element element){
         
         StringBuilder bld = new StringBuilder();
         List<Element> docElements = Utils.extractElements(element, "doc");
@@ -17,9 +21,7 @@ public class DocumentationExtractor {
         }
         
         String str = bld.toString();
-        DocumentationModel result = new DocumentationModel(str);
-        return result;
-        
+        result.setContent(str);
     }
 
 }

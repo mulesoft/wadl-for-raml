@@ -1,25 +1,21 @@
 package org.wadl.model.builder;
 
 import java.util.List;
-import java.util.Map;
-
-import org.mulesoft.web.app.model.DocumentationModel;
 import org.mulesoft.web.app.model.MethodModel;
 import org.mulesoft.web.app.model.ParameterModel;
 import org.mulesoft.web.app.model.ResourceModel;
 import org.w3c.dom.Element;
 
-public class ResourceBuilder {
+public class ResourceBuilder extends AbstractBuilder<ResourceModel> {
     
-    private DocumentationExtractor docExtractor = new DocumentationExtractor();
-    
-    private MethodBuilder methodBuilder = new MethodBuilder();
-    
-    private ParameterBuilder paramBuilder = new ParameterBuilder();
-    
-    public ResourceModel buildResource(Element element){
+    public ResourceBuilder(Class<ResourceModel> modelClass) {
+		super(modelClass);
+	}
+
+	public void fillModel(ResourceModel resource,Element element) throws Exception{
         
-        ResourceModel resource = new ResourceModel();
+        extractDocumentation(element, resource);
+        
         String idStr = element.getAttribute("id");
         if(!idStr.isEmpty()){
             resource.setId(idStr);
@@ -36,25 +32,24 @@ public class ResourceBuilder {
             resource.setPath(pathStr);
         }
         
-        DocumentationModel doc = docExtractor.extractDocumentation(element);
-        resource.setDoc(doc);
-        
+        MethodBuilder methodBuilder = getBuildManager().getBuilder(MethodBuilder.class);
         List<Element> methodElements = Utils.extractElements(element, "method");
         for(Element methodElement : methodElements){
-            MethodModel method = methodBuilder.buildMethod(methodElement);
+			MethodModel method = methodBuilder.build(methodElement);
             resource.addMethod(method);
         }
         
         List<Element> resourceElements = Utils.extractElements(element,"resource");
         for(Element resourceElement : resourceElements){
             
-            ResourceModel res = buildResource(resourceElement);
+            ResourceModel res = build(resourceElement);
             resource.addResource(res);
         }
         
+        ParameterBuilder paramBuilder = getBuildManager().getBuilder(ParameterBuilder.class);
         List<Element> paramElements = Utils.extractElements(element, "param");
-        for(Element paramElement : paramElements){
-            ParameterModel param = paramBuilder.buildParameter(paramElement);
+        for(Element paramElement : paramElements){            
+			ParameterModel param = paramBuilder.build(paramElement);
             String style = param.getStyle();
             if("query".equals(style)){
                 resource.addQueryParam(param);
@@ -63,8 +58,6 @@ public class ResourceBuilder {
                 resource.addHeader(param);
             }
         }
-        
-        return resource;
         
     }
 

@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import org.mulesoft.web.app.model.AbstractElement;
+import org.mulesoft.web.app.model.DocumentationModel;
 import org.mulesoft.web.app.model.ResourceModel;
-import org.mulesoft.web.app.model.ResponseModel;
 import org.raml.model.Action;
 import org.raml.model.Resource;
 import org.raml.model.Response;
@@ -68,7 +68,11 @@ public class Utils {
     
 
     public static void setDocumentation(AbstractElement element, Action action) {
-        String content = element.getDoc().getContent();
+        DocumentationModel doc = element.getDoc();
+        if(doc==null){
+        	return;
+        }
+		String content = doc.getContent();
         if(content.trim().isEmpty()){
             return;
         }

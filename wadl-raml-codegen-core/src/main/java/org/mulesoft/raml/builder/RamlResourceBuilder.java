@@ -27,9 +27,7 @@ public class RamlResourceBuilder {
         String path = resourceModel.getPath();
         ramlResource.setRelativeUri(path);
         
-        for(List<MethodModel> list : resourceModel.getMethods().values()){
-            
-            MethodModel method = list.get(0);
+        for(MethodModel method : resourceModel.getMethods()){
             Action action = actionBuilder.buildRamlAction(method);
             ramlResource.getActions().put(action.getType(), action);
         }

@@ -1,49 +1,41 @@
 package org.wadl.model.builder;
 
 import java.util.List;
-import java.util.Map;
 
 import org.mulesoft.web.app.model.ParameterModel;
-import org.mulesoft.web.app.model.DocumentationModel;
 import org.mulesoft.web.app.model.RepresentationModel;
 import org.mulesoft.web.app.model.ResponseModel;
 import org.w3c.dom.Element;
 
-public class ResponseBuilder {
+public class ResponseBuilder extends AbstractBuilder<ResponseModel> {
     
-    private DocumentationExtractor docExtractor = new DocumentationExtractor();
-    
-    private ParameterBuilder paramBuilder = new ParameterBuilder();
-    
-    private RepresentationBuilder representationBuilder = new RepresentationBuilder();
-    
-    public ResponseModel buildResponse(Element element){
+    public ResponseBuilder(Class<ResponseModel> modelClass) {
+		super(modelClass);
+	}
+
+	public void fillModel(ResponseModel responseModel, Element element) throws Exception{
         
-        ResponseModel responseModel = new ResponseModel();
-        DocumentationModel doc = docExtractor.extractDocumentation(element);
-        responseModel.setDoc(doc);
+        extractDocumentation(element, responseModel);
         
         String status = element.getAttribute("status");
         responseModel.setStatus(status);
         
         List<Element> paramElements = Utils.extractElements(element, "param");
-        for(Element paramElement : paramElements){
-            ParameterModel param = paramBuilder.buildParameter(paramElement);
+        ParameterBuilder paramBuilder = getBuildManager().getBuilder(ParameterBuilder.class);
+        for(Element paramElement : paramElements){            
+			ParameterModel param = paramBuilder.build(paramElement);
             String style = param.getStyle();
             if("header".equals(style)){
                 responseModel.addHeader(param);
             }
         }
         
+        RepresentationBuilder representationBuilder = getBuildManager().getBuilder(RepresentationBuilder.class);
         List<Element> representationElements = Utils.extractElements(element, "representation");
         for(Element representationElement : representationElements){
-        	String schemaName = representationElement.getAttribute("element").substring("yn:".length());
-            RepresentationModel representation = representationBuilder.buildRepresentation(representationElement);
-            representation.setSchema(schemaName);
+			RepresentationModel representation = representationBuilder.build(representationElement);
             responseModel.addRepresentation(representation);
         }
-        
-        return responseModel;
     }
 
 }
