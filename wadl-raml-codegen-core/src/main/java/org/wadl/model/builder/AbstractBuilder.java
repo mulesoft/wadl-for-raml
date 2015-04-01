@@ -6,7 +6,7 @@ import org.w3c.dom.Element;
 
 public abstract class AbstractBuilder<T extends AbstractElement> {
 	
-	private Class<T> modelClass;
+	protected Class<T> modelClass;
 	
 	public AbstractBuilder(Class<T> modelClass) {
 		this.modelClass = modelClass;
@@ -31,6 +31,12 @@ public abstract class AbstractBuilder<T extends AbstractElement> {
 		return modelElement;
 	}
 
+	protected T build(String element) throws Exception{
+		T modelElement = getBuildManager().getModelElement(modelClass, element);
+		
+		return modelElement;
+	}
+	
 	abstract void fillModel(T modelElement, Element element) throws Exception;
 
 	public IPathResolver getPathResolver() {

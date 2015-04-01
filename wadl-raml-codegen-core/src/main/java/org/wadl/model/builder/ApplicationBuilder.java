@@ -15,6 +15,7 @@ import org.apache.xerces.xs.XSModel;
 import org.apache.xerces.xs.XSNamedMap;
 import org.mulesoft.web.app.model.ApplicationModel;
 import org.mulesoft.web.app.model.ResourceModel;
+import org.mulesoft.web.app.model.ResourceTypeModel;
 import org.w3c.dom.Element;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.LSInput;
@@ -59,6 +60,12 @@ public class ApplicationBuilder extends AbstractBuilder<ApplicationModel> {
             }
         }
         
+        ResourceTypeBuilder resourceTypeBuilder = getBuildManager().getBuilder(ResourceTypeBuilder.class);
+        List<Element> resourceTypeElements = Utils.extractElements(element, "resource_type");
+        for(Element resourceTypeElement : resourceTypeElements){
+        	resourceTypeBuilder.build(resourceTypeElement);
+        }
+
         MethodBuilder methodBuilder = getBuildManager().getBuilder(MethodBuilder.class);
         List<Element> methodElements = Utils.extractElements(element, "method");
         for(Element methodElement: methodElements){

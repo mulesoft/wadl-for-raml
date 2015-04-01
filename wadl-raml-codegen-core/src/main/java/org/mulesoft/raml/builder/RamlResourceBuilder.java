@@ -27,12 +27,17 @@ public class RamlResourceBuilder {
         String path = resourceModel.getPath();
         ramlResource.setRelativeUri(path);
         
-        for(MethodModel method : resourceModel.getMethods()){
+        List<MethodModel> methodsList  = resourceModel.getMethods();
+        if (resourceModel.getType() != null)
+        	methodsList.addAll(resourceModel.getType().getMethods());
+        for(MethodModel method : methodsList){
             Action action = actionBuilder.buildRamlAction(method);
             ramlResource.getActions().put(action.getType(), action);
         }
         
         List<ParameterModel> queryParams = resourceModel.getQueryParams();
+        if (resourceModel.getType() != null)
+        	queryParams.addAll(resourceModel.getType().getQueryParams());
         for(ParameterModel paramModel : queryParams){
             String name = paramModel.getName();
             QueryParameter qParam = paramBuilder.buildQueryParameter(paramModel);
@@ -42,6 +47,8 @@ public class RamlResourceBuilder {
         }
         
         List<ParameterModel> headers = resourceModel.getHeaders();
+        if (resourceModel.getType() != null)
+        	headers.addAll(resourceModel.getType().getHeaders());
         for(ParameterModel paramModel: headers){
             String name = paramModel.getName();
             Header header = paramBuilder.buildHeader(paramModel);
@@ -51,10 +58,12 @@ public class RamlResourceBuilder {
         }
         
         LinkedHashMap<String, ResourceModel> resources = resourceModel.getResources();
+        if (resourceModel.getType() != null)
+        	resources.putAll(resourceModel.getType().getResources());
         for(ResourceModel resource: resources.values()){
             Resource res = buildResource(resource);
             res.setParentUri(path);
-            String path0 = res.getUri();
+            String path0 = res.getRelativeUri();
             ramlResource.getResources().put(path0, res);
         }
         

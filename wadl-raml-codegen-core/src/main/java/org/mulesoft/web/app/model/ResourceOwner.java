@@ -11,11 +11,10 @@ public class ResourceOwner extends AbstractElement {
     }
 
     public LinkedHashMap<String,ResourceModel> getResources() {
-        return resources;
+        return this.resources;
     }
 
     public void addResource(ResourceModel res) {
         this.resources.put(res.getPath(), res);
     }
-
 }

@@ -11,6 +11,7 @@ import org.mulesoft.web.app.model.ParameterModel;
 import org.mulesoft.web.app.model.RepresentationModel;
 import org.mulesoft.web.app.model.RequestModel;
 import org.mulesoft.web.app.model.ResourceModel;
+import org.mulesoft.web.app.model.ResourceTypeModel;
 import org.mulesoft.web.app.model.ResponseModel;
 import org.w3c.dom.Element;
 
@@ -67,6 +68,32 @@ public class BuildManager {
 		return (T) instance;
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends AbstractElement>T getModelElement(Class<T> clazz, String id){
+		if(id.startsWith("#")){
+			id = id.substring("#".length());
+		}
+		
+		HashMap<String, AbstractElement> map = modelMap.get(clazz);
+		if(map==null){
+			map = new HashMap<String, AbstractElement>();
+			modelMap.put(clazz, map);
+		}
+		AbstractElement instance = map.get(id);
+		if(instance==null){
+			try {
+				instance = clazz.newInstance();
+				instance.setId(id);
+				map.put(id, instance);				
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+		return (T) instance;
+	}
+	
 	public ApplicationModel process(Element element) throws Exception{
 		ApplicationBuilder appBuilder = getBuilder(ApplicationBuilder.class);
 		ApplicationModel appModel = appBuilder.build(element);
@@ -93,6 +120,7 @@ public class BuildManager {
 		builderToModelMap.put(ParameterBuilder.class, ParameterModel.class);
 		builderToModelMap.put(RepresentationBuilder.class,	RepresentationModel.class);
 		builderToModelMap.put(RequestBuilder.class, RequestModel.class);
+		builderToModelMap.put(ResourceTypeBuilder.class, ResourceTypeModel.class);
 		builderToModelMap.put(ResourceBuilder.class, ResourceModel.class);
 		builderToModelMap.put(ResponseBuilder.class, ResponseModel.class);
 		builderToModelMap.put(DocumentationExtractor.class, DocumentationModel.class);
