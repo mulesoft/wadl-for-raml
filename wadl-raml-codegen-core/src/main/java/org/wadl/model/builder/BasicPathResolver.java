@@ -17,9 +17,11 @@ import org.apache.commons.io.IOUtils;
 public class BasicPathResolver implements IPathResolver {
 	
 	private File root;
+	private File outputRoot;
 
-	public BasicPathResolver(File root) {
+	public BasicPathResolver(File root, File outputRoot) {
 		this.root = root;
+		this.outputRoot = outputRoot;
 	}
 
 	public String getContent(String path) {
@@ -65,4 +67,7 @@ public class BasicPathResolver implements IPathResolver {
 		}
 	}
 
+	public String getOutputRootPath() {
+		return outputRoot.getPath();
+	}
 }

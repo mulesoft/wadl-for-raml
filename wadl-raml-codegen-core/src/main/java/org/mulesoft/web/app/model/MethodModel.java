@@ -25,7 +25,6 @@ public class MethodModel extends AbstractElement {
         this.requests.add(request);
     }
     
-    
     public void addResponse(ResponseModel response){
         String status = response.getStatus();
         List<ResponseModel> list = this.responses.get(status);

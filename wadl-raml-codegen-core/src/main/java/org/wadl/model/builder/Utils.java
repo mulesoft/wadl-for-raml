@@ -59,6 +59,8 @@ public class Utils {
     }
     
     public static void setDocumentation(AbstractElement element, Resource resource) {
+    	if (element.getDoc() == null)
+    		return;
         String content = element.getDoc().getContent();
         if(content.trim().isEmpty()){
             return;
@@ -99,4 +101,24 @@ public class Utils {
         return str == null || str.trim().isEmpty();
     }
 
+	public static String stringToCamel(String rawString){
+		rawString = rawString.trim();
+		if (rawString.contains(" ") || rawString.contains("-") || rawString.contains("_")){
+			String separator = " ";
+			if(!rawString.contains(" "))
+				separator = rawString.contains("-")?"-":"_";
+			String [] segments = rawString.trim().toLowerCase().split(separator);
+			StringBuilder camelCaseString = new StringBuilder();
+			camelCaseString.append(segments[0]);
+			for (int i = 1; i < segments.length; i++){
+				String segment = segments[i];
+				camelCaseString.append(segment.substring(0, 1).toUpperCase() + segment.substring(1));
+			}
+			return camelCaseString.toString();
+		}
+		else {
+			rawString = rawString.substring(0, 1).toLowerCase() + rawString.substring(1);
+			return rawString;
+		}
+	}
 }

@@ -32,7 +32,8 @@ public class RamlResourceBuilder {
         	methodsList.addAll(resourceModel.getType().getMethods());
         for(MethodModel method : methodsList){
             Action action = actionBuilder.buildRamlAction(method);
-            ramlResource.getActions().put(action.getType(), action);
+            if (action.getType() != null)
+            	ramlResource.getActions().put(action.getType(), action);
         }
         
         List<ParameterModel> queryParams = resourceModel.getQueryParams();

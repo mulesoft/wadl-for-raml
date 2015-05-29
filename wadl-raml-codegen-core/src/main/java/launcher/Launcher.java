@@ -39,7 +39,7 @@ public class Launcher {
 
     private static void process(File inputFile, File outputFile) throws Exception {
         
-    	BasicPathResolver pathResolver = new BasicPathResolver(inputFile.getParentFile());
+    	BasicPathResolver pathResolver = new BasicPathResolver(inputFile.getParentFile(), outputFile.getParentFile());
     	
         BuildManager buildManger = new BuildManager();
         buildManger.setPathResolver(pathResolver);

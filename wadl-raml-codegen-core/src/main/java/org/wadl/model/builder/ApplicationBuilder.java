@@ -143,7 +143,8 @@ public class ApplicationBuilder extends AbstractBuilder<ApplicationModel> {
     	for (Element grammar : grammars){
     		List<Element> includes = Utils.extractElements(grammar, "include");  
     		for (Element include : includes)
-    			includePaths.add(include.getAttribute("href"));
+    			if (include.hasAttribute("href"))
+    				includePaths.add(include.getAttribute("href"));
     	}
     	return includePaths;
     }

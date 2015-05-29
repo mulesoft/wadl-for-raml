@@ -9,8 +9,9 @@ public class RepresentationModel extends AbstractElement{
 
     private String schema;
     
+    private String example;
+    
     private List<ParameterModel> formParameters = new ArrayList<ParameterModel>();
-
 
     public String getMediaType() {
         return mediaType;
@@ -36,4 +37,11 @@ public class RepresentationModel extends AbstractElement{
 		this.schema = schema;
 	}
 
+	public String getExample() {
+		return example;
+	}
+
+	public void setExample(String example) {
+		this.example = example;
+	}
 }

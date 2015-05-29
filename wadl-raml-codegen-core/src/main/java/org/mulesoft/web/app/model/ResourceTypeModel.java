@@ -49,6 +49,10 @@ public class ResourceTypeModel extends ResourceOwner {
         return methods;
     }
     
+    public void setMethods(List<MethodModel> methods){
+    	this.methods = methods;
+    }
+    
     @Override
     public String toString() {
         return path;

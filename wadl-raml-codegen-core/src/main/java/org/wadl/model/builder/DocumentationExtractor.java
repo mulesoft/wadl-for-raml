@@ -15,6 +15,8 @@ public class DocumentationExtractor extends AbstractBuilder<DocumentationModel> 
         
         StringBuilder bld = new StringBuilder();
         List<Element> docElements = Utils.extractElements(element, "doc");
+        if (docElements.size() == 0)
+        	docElements = Utils.extractElements(element, "wadl:doc");
         for(Element docElement : docElements){
             String titleValue = docElement.getAttribute("title");
             bld.append(titleValue);
