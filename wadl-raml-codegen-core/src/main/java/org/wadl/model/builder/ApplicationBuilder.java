@@ -1,11 +1,16 @@
 package org.wadl.model.builder;
 
+import java.io.StringWriter;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.xerces.dom.DOMInputImpl;
 import org.apache.xerces.xs.XSConstants;
@@ -15,7 +20,6 @@ import org.apache.xerces.xs.XSModel;
 import org.apache.xerces.xs.XSNamedMap;
 import org.mulesoft.web.app.model.ApplicationModel;
 import org.mulesoft.web.app.model.ResourceModel;
-import org.mulesoft.web.app.model.ResourceTypeModel;
 import org.w3c.dom.Element;
 import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 import org.w3c.dom.ls.LSInput;
@@ -79,11 +83,19 @@ public class ApplicationBuilder extends AbstractBuilder<ApplicationModel> {
         }
     }
     
-    private Map<String, String> getSchemas(Element element, IPathResolver pathResolver) throws IOException {
+    private Map<String, String> getSchemas(Element element, IPathResolver pathResolver) {
     	
     	List<String> includePaths = getIncludePaths(element);
     	
+    	Map<String, String> grammarsElements = null;
+		try {
+			grammarsElements = getGrammarsElements(element);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    	
     	Map<String,String> schemas = new HashMap<String, String>();
+    	schemas.putAll(grammarsElements);
     	
     	for (String path : includePaths){
 
@@ -148,5 +160,34 @@ public class ApplicationBuilder extends AbstractBuilder<ApplicationModel> {
     	}
     	return includePaths;
     }
-
+	
+	private Map<String,String> getGrammarsElements(Element element) throws Exception {
+		Map<String, String> schemasElements = new HashMap<String, String>();
+		List<Element> grammars = Utils.extractElements(element, "grammars");
+		
+		for (Element grammar : grammars){
+    		List<Element> elements = Utils.extractElements(grammar, "xs:element");  
+    		for (Element schema : elements){
+    			if (schema.hasAttribute("name")){
+    				String rawSchema = elementToString(schema);
+    				String headerPart = rawSchema.substring(0, rawSchema.indexOf(">") + ">".length());
+    				String schemaContent = headerPart + "\n" + 
+    						"<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" +
+    						rawSchema.substring(headerPart.length()) +
+    						"</xs:schema>";
+    				schemasElements.put(schema.getAttribute("name"), schemaContent);
+    			}
+    		}
+    	}
+		return schemasElements;
+	}
+	
+	private String elementToString(Element element) throws Exception{
+	    DOMSource domSource = new DOMSource(element);
+	    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+	    StringWriter sw = new StringWriter();
+	    StreamResult sr = new StreamResult(sw);
+	    transformer.transform(domSource, sr);
+	    return sw.toString();  
+	}
 }
