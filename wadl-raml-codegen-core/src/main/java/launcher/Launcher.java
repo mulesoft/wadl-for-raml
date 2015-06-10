@@ -18,6 +18,8 @@ import org.w3c.dom.Element;
 import org.wadl.model.builder.BasicPathResolver;
 import org.wadl.model.builder.BuildManager;
 
+import com.mulesoft.raml.optimizer.ResourceOptimizer;
+
 public class Launcher {
     
     public static void main(String[] args){
@@ -51,6 +53,9 @@ public class Launcher {
         
         ApplicationModel app = buildManger.process(element);
         Raml2 raml = ramlBuilder.buildRaml(app);
+        
+        ResourceOptimizer resourceOptimizer = new ResourceOptimizer(raml);
+        resourceOptimizer.optimizeRaml();
         
         saveRaml(outputFile, raml);
     }

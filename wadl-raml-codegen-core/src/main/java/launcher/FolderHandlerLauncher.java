@@ -27,6 +27,8 @@ import org.w3c.dom.Element;
 import org.wadl.model.builder.BasicPathResolver;
 import org.wadl.model.builder.BuildManager;
 
+import com.mulesoft.raml.optimizer.ResourceOptimizer;
+
 public class FolderHandlerLauncher {
 	public static void main (String [] args){
 		Map<String, String> cliParams = getCLIParams(args);
@@ -76,6 +78,9 @@ public class FolderHandlerLauncher {
 		RamlBuilder ramlBuilder = new RamlBuilder();
         
         Raml2 raml = ramlBuilder.buildRaml(fullAppModel);
+        
+        ResourceOptimizer resourceOptimizer = new ResourceOptimizer(raml);
+        resourceOptimizer.optimizeRaml();
         
         saveRaml(new File(outputDir, "api.raml"), raml);
 	}
